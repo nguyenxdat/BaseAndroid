@@ -3,18 +3,20 @@ package vn.datnx.demo.task;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import java.lang.ref.WeakReference;
+
 import vn.datnx.demo.task.helper.ResponseLoadData;
 
 public abstract class TaskBaseAsyncTask<RESULT> extends AsyncTask<Void, Void, RESULT> {
 
-    private Context context;
+    private WeakReference<Context> context;
     private ResponseLoadData.Listener<RESULT> listener;
 
     public TaskBaseAsyncTask(Context context) {
-        this.context = context;
+        this.context = new WeakReference<>(context);
     }
 
-    public Context getContext() {
+    public WeakReference<Context> getContext() {
         return context;
     }
 
@@ -25,6 +27,10 @@ public abstract class TaskBaseAsyncTask<RESULT> extends AsyncTask<Void, Void, RE
 
     @Override
     protected void onPostExecute(RESULT result) {
+        Context context = TaskBaseAsyncTask.this.context.get();
+        if (null == context) {
+            return;
+        }
         if (null != listener) {
             listener.onResponse(result);
         }
